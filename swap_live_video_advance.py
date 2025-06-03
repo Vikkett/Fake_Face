@@ -332,7 +332,7 @@ class FaceSwapApp:
                 self.status_var.set(f"Saved to {os.path.basename(path)}")
             except Exception as e:
                 messagebox.showerror("Save Error", str(e))
-
+     # sprint 4
     def open_live_video(self):
         if self.source_image is None:
             messagebox.showwarning("Live Swap", "Please load a source image first.")
@@ -359,7 +359,7 @@ class FaceSwapApp:
         cap.release()
         cv2.destroyAllWindows()
         self.status_var.set("Live video closed.")
-
+     # sprint 4
     def perform_live_swap(self, frame, source_image):
         src_landmarks = self.get_landmarks(source_image)
         tgt_landmarks = self.get_landmarks(frame)
