@@ -292,7 +292,7 @@ class FaceSwapApp:
             self.status_var.set("Face swap completed.")
         except Exception as e:
             messagebox.showerror("Error", f"Update failed: {str(e)}")
-
+    # sprint 4
     def update_blend(self, event=None):
         if hasattr(self, 'result_image'):
             self.update_face_swap()
