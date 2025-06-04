@@ -297,9 +297,14 @@ class FaceSwapApp:
         if hasattr(self, 'result_image'):
             self.update_face_swap()
 
+   # def update_color(self, event=None):
+    #    if hasattr(self, 'result_image'):
+     #       self.update_face_swap()
+
     def update_color(self, event=None):
         if hasattr(self, 'result_image'):
             self.update_face_swap()
+
 
     def show_image(self, image, label_widget):
         rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
