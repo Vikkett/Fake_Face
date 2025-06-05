@@ -220,6 +220,7 @@ class FaceSwapApp:
         cv2.fillConvexPoly(mask, hull, 1.0)
         mask = cv2.GaussianBlur(mask, (15, 15), 0)
         return mask[..., np.newaxis]
+    # sprint 4 finished
 
     def adjust_colors(self, src, target, amount):
         if amount == 0:
