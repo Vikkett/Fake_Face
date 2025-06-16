@@ -67,3 +67,10 @@ Generate AI Face : récupère un visage généré aléatoirement par IA.
 Webcam Source / Target : capture une image directement depuis votre webcam.
 
 Live Swap Video : active le remplacement de visage en temps réel avec la webcam.
+
+⚠️ Remarques
+L’algorithme ne fonctionne correctement que si un visage est clairement détecté dans les deux images.
+
+L'application utilise uniquement le premier visage détecté sur chaque image.
+
+Le résultat peut varier selon l’éclairage, l’angle du visage et la résolution.
