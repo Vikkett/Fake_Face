@@ -1,7 +1,8 @@
 # Fake_Face
 Professional Face Swap est une application de bureau en Python permettant de réaliser des échanges de visages (face swap) de haute qualité entre deux images, ou en direct via webcam.
 
-🧠 Fonctionnalités
+🧠 Fonctionnalités : 
+
 📂 Charger une image source et une image cible
 
 🧍 Générer un visage IA automatiquement depuis le web
@@ -42,7 +43,7 @@ Télécharger shape_predictor_68_face_landmarks.dat depuis :
 https://github.com/davisking/dlib-models
 Placez le fichier dans le même dossier que le script.
 
-▶️ Utilisation
+▶️ Utilisation :
 Lancer l’application
 bash
 Copier
