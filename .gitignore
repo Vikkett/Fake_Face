@@ -1,0 +1,18 @@
+Python artifacts
+pycache/
+*.pyc
+
+Operating System files
+.DS_Store
+Thumbs.db
+
+Generated images, temporary files, and user uploads
+result.jpg
+*.jpg
+*.jpeg
+*.png
+ai_faces/
+temp_result.jpg
+
+The large Dlib face landmark model file
+shape_predictor_68_face_
