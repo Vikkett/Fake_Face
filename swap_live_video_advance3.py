@@ -431,6 +431,7 @@ class FaceSwapApp:
             self.status_var.set("Email failed to send.")
         finally:
             self.root.config(cursor="")
+            #print(self.status_var) # control status
 
     def open_live_video(self):
         if self.source_image is None:
