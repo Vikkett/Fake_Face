@@ -434,6 +434,8 @@ class FaceSwapApp:
             #print(self.status_var) # control status
 
     def open_live_video(self):
+        # control de live video
+        # #print(self.source_image)
         if self.source_image is None:
             messagebox.showwarning("Live Swap", "Please load a source image first.")
             return
