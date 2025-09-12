@@ -402,8 +402,8 @@ class FaceSwapApp:
 
             # Create a multipart message
             msg = MIMEMultipart()
-            msg['From'] = sender_email
-            msg['To'] = recipient_email
+            msg['From'] = sender_email # for email for sender
+            msg['To'] = recipient_email # for email for recevreur  pour eviter les collision
             msg['Subject'] = "Your Face-Swapped Photo!"
 
             # Attach the text body
