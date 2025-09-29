@@ -12,8 +12,9 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
 from email.mime.text import MIMEText
 
-
+# Définition d'une classe qui représente toute l'application de Face Swap
 class FaceSwapApp:
+    # Constructeur, appelé à la création de l'objet
     def __init__(self, root):
         self.root = root
 
@@ -29,7 +30,7 @@ class FaceSwapApp:
 
         self.display_width = 400
         self.display_height = 300
-
+    # Ajouter l'icon sur l'interface
     def load_icons(self):
         icon_size = (20, 20)
         self.icon_load = None
@@ -52,17 +53,21 @@ class FaceSwapApp:
         except Exception as e:
             messagebox.showerror("Icon Load Error", f"Failed to load one or more icons: {e}")
 
+    # Fonction pour créer toute l'interface graphique
     def setup_ui(self):
         self.root.title("Professional Face Swap v2.3")
         self.root.geometry("1200x800")
         self.root.minsize(1000, 700)
         self.root.configure(bg="#e9ebee")
 
+        # crée un conteneur principal
         main_frame = Frame(self.root, bg="#e9ebee")
+        # Place le conteneur dans la fenêtre avec marges
         main_frame.pack(fill=BOTH, expand=True, padx=20, pady=20)
 
         # === Image Frames ===
         self.image_frame = Frame(main_frame, bg="#e9ebee")
+        # L'affiche en remplissant l'espace disponible
         self.image_frame.pack(fill=BOTH, expand=True)
 
         self.source_frame = LabelFrame(self.image_frame, text="Source Image", font=("Arial", 12, "bold"), bg="white",
@@ -90,9 +95,10 @@ class FaceSwapApp:
         control_frame = Frame(main_frame, bg="#e9ebee")
         control_frame.pack(fill=X, pady=10)
 
-        # Buton grupları
+        # Crée un groupe de boutons pour les entées (input)
         input_buttons = Frame(control_frame, bg="#e9ebee")
         input_buttons.pack(side=LEFT, padx=10)
+        # Crée des boutons avec ces fonctionnalités
         self.make_button(input_buttons, "Load Source", self.load_source, icon=self.icon_load).pack(side=LEFT, padx=5)
         self.make_button(input_buttons, "Load Target", self.load_target, icon=self.icon_load).pack(side=LEFT, padx=5)
         self.make_button(input_buttons, "Webcam Source", lambda: self.capture_from_webcam(is_source=True),
@@ -101,9 +107,10 @@ class FaceSwapApp:
                          icon=self.icon_webcam).pack(side=LEFT, padx=5)
         self.make_button(input_buttons, "Generate AI Face", self.generate_ai_face, icon=self.icon_ai).pack(side=LEFT,
                                                                                                            padx=5)
-
+        # Crée un groupe de boutons pour les actions (output)
         action_buttons = Frame(control_frame, bg="#e9ebee")
         action_buttons.pack(side=RIGHT, padx=10)
+        # Bouton pour échanger les visage entre source et cible
         self.make_button(action_buttons, "Swap Faces", self.swap_faces, "#3498db", icon=self.icon_swap).pack(side=LEFT,
                                                                                                              padx=5)
         self.make_button(action_buttons, "Live Swap", self.open_live_video, "#ff9800", icon=self.icon_swap).pack(
