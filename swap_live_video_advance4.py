@@ -90,11 +90,15 @@ class FaceSwapApp:
         control_frame = Frame(main_frame, bg="#e9ebee")
         control_frame.pack(fill=X, pady=10)
 
-        # Buton grupları
+        # Buton groups
         input_buttons = Frame(control_frame, bg="#e9ebee")
         input_buttons.pack(side=LEFT, padx=10)
         self.make_button(input_buttons, "Load Source", self.load_source, icon=self.icon_load).pack(side=LEFT, padx=5)
         self.make_button(input_buttons, "Load Target", self.load_target, icon=self.icon_load).pack(side=LEFT, padx=5)
+        self.make_button(input_buttons, "Source Celebrity", lambda: self.load_celebrity(is_source=True),
+                         icon=self.icon_load).pack(side=LEFT, padx=5)
+        self.make_button(input_buttons, "Target Celebrity", lambda: self.load_celebrity(is_source=False),
+                         icon=self.icon_load).pack(side=LEFT, padx=5)
         self.make_button(input_buttons, "Webcam Source", lambda: self.capture_from_webcam(is_source=True),
                          icon=self.icon_webcam).pack(side=LEFT, padx=5)
         self.make_button(input_buttons, "Webcam Target", lambda: self.capture_from_webcam(is_source=False),
