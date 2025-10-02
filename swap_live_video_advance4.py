@@ -1,16 +1,16 @@
-import cv2
-import numpy as np
-import dlib
-from tkinter import *
-from tkinter import filedialog, messagebox, simpledialog
-from PIL import Image, ImageTk, ImageDraw, ImageFont
-import os
-import urllib.request
-import uuid
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.image import MIMEImage
-from email.mime.text import MIMEText
+import cv2 # bibliothèque OpenCV pour le traitement d'image et la vidéo
+import numpy as np # pour manipulation de tableaux et matrices
+import dlib # la détection et le repérage des points clés du visage
+from tkinter import * # pour créer l'interface graphique
+from tkinter import filedialog, messagebox, simpledialog # boîte de dialogue de fichiers et messages
+from PIL import Image, ImageTk, ImageDraw, ImageFont # gérer l'affichage des images
+import os # la gestion des fichiers et dossiers
+import urllib.request # télécharger des images depuis le web
+import uuid # générer des identifiants uniques (nommer fichiers)
+import smtplib # permettre de se connecter à un serveur SMTP (serveur d'envoie d'emails)
+from email.mime.multipart import MIMEMultipart # créer un email avec plusieurs parties
+from email.mime.image import MIMEImage # inclure des images dans l'email
+from email.mime.text import MIMEText # ajouter du texte dans l'email
 
 # Définition d'une classe qui représente toute l'application de Face Swap
 class FaceSwapApp:
