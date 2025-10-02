@@ -224,6 +224,42 @@ class FaceSwapApp:
 
     def load_target(self):
         self.load_image(is_source=False)
+        
+    def load_celebrity(self, is_source=True):
+        celeb_folder = os.path.join(os.getcwd(), "celebs")
+        if not os.path.exists(celeb_folder):
+            messagebox.showerror("Error", "Celebs folder not found! Please create a 'celebs' folder with celebrity images.")
+            return
+
+        path = filedialog.askopenfilename(
+            initialdir=celeb_folder,
+            title="Select Celebrity Image",
+            filetypes=[("Image Files", "*.jpg *.jpeg *.png")]
+        )
+
+        if not path:
+            return
+
+        try:
+            image = cv2.imread(path)
+            if image is None:
+                raise ValueError("Invalid image file")
+            if is_source:
+                self.source_image = image
+                self.source_path = path
+                self.show_image(image, self.source_label)
+                self.status_var.set(f"Celebrity source image loaded: {os.path.basename(path)}")
+            else:
+                self.target_image = image
+                self.target_path = path
+                self.show_image(image, self.target_label)
+                self.status_var.set(f"Celebrity target image loaded: {os.path.basename(path)}")
+
+            if self.source_image is not None and self.target_image is not None:
+                self.status_var.set("Ready to perform face swap with celebrity.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load celebrity image: {str(e)}")
+
 
     def capture_from_webcam(self, is_source=True):
         cap = cv2.VideoCapture(0)
