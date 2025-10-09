@@ -17,8 +17,6 @@ import urllib.request
 # Importation de uuid pour générer des identifiants uniques (utile pour nommer des fichiers)
 import uuid
 
-from swap_live_video_advance import FaceSwapApp
-
 
 # Définition d'une classe qui représente toute l'application de Face Swap
 class FaceSwapApp:
@@ -48,99 +46,134 @@ class FaceSwapApp:
         self.display_height = 300
 
         # Fonction pour créer toute l'interface graphique
+
     def setup_ui(self):
-        # Définit le titre de la fenêtre
+        # --- DÉBUT DES MODIFICATIONS DE COULEUR ---
+
+        # Définition des couleurs thématiques
+        THEME_BG = "#2E2E2E"  # Gris foncé pour le fond général
+        SOURCE_COLOR = "#005000"  # Vert foncé pour le thème source
+        TARGET_COLOR = "#500000"  # Rouge foncé pour le thème cible
+        ACCENT_COLOR = "#AAAAAA"  # Couleur de texte/frontière
+
+        # Configure le fond de la fenêtre principale
+        self.root.config(bg=THEME_BG)
         self.root.title("Professional Face Swap v2.3")
-        # Définit la taille par défaut de la fenêtre
         self.root.geometry("1000x700")
-        # Définit la taille minimale autorisée
         self.root.minsize(900, 600)
 
         # Crée un conteneur principal
-        main_frame = Frame(self.root)
+        main_frame = Frame(self.root, bg=THEME_BG)  # Applique la couleur de fond
         # Place le conteneur dans la fenêtre avec marges
         main_frame.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
         # Crée un cadre pour les images (source, cible, résultat)
-        self.image_frame = Frame(main_frame)
+        self.image_frame = Frame(main_frame, bg=THEME_BG)  # Applique la couleur de fond
         # L’affiche en remplissant l’espace disponible
         self.image_frame.pack(fill=BOTH, expand=True)
 
         # Crée un cadre étiqueté pour l'image source
-        self.source_frame = LabelFrame(self.image_frame, text="Source Image")
+        # Utilisation de la couleur SOURCE_COLOR pour le cadre
+        self.source_frame = LabelFrame(self.image_frame, text="Source Image", bg=SOURCE_COLOR, fg="white",
+                                       labelanchor="n", font=("Helvetica", 12, "bold"))
         # Place ce cadre à gauche
         self.source_frame.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
         # Crée un label (zone où l’image source sera affichée)
-        self.source_label = Label(self.source_frame)
+        self.source_label = Label(self.source_frame, bg=SOURCE_COLOR)  # Applique la couleur de fond
         # Ajoute le label dans le cadre
         self.source_label.pack()
 
         # Crée un cadre étiqueté pour l'image cible
-        self.target_frame = LabelFrame(self.image_frame, text="Target Image")
+        # Utilisation de la couleur TARGET_COLOR pour le cadre
+        self.target_frame = LabelFrame(self.image_frame, text="Target Image", bg=TARGET_COLOR, fg="white",
+                                       labelanchor="n", font=("Helvetica", 12, "bold"))
         # Place ce cadre au centre
         self.target_frame.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
         # Crée un label (zone où l’image cible sera affichée)
-        self.target_label = Label(self.target_frame)
+        self.target_label = Label(self.target_frame, bg=TARGET_COLOR)  # Applique la couleur de fond
         # Ajoute le label dans le cadre
         self.target_label.pack()
 
         # Crée un cadre pour l'image résultat
-        self.result_frame = LabelFrame(self.image_frame, text="Result Image")
+        # Couleur neutre pour le résultat
+        self.result_frame = LabelFrame(self.image_frame, text="Result Image", bg=THEME_BG, fg="white", labelanchor="n",
+                                       font=("Helvetica", 12, "bold"))
         # Crée un label où sera affiché le résultat
-        self.result_label = Label(self.result_frame)
+        self.result_label = Label(self.result_frame, bg=THEME_BG)  # Applique la couleur de fond
         # Ajoute le label dans le cadre
         self.result_label.pack()
 
         # Crée un cadre pour les boutons de contrôle
-        control_frame = Frame(main_frame)
+        control_frame = Frame(main_frame, bg=THEME_BG)  # Applique la couleur de fond
         # L’affiche horizontalement en bas
         control_frame.pack(fill=X, pady=10)
 
-        # Bouton pour charger image source
-        Button(control_frame, text="Load Source", command=self.load_source).grid(row=0, column=0, padx=5)
-        # Bouton pour charger image cible
-        Button(control_frame, text="Load Target", command=self.load_target).grid(row=0, column=1, padx=5)
-        # Bouton pour lancer le swap
-        Button(control_frame, text="Swap Faces", command=self.swap_faces).grid(row=0, column=2, padx=5)
+        # Configuration du style des boutons (SANS COULEUR DE FOND DEFAUT)
+        # Ceci résout le "multiple values for keyword argument 'bg'"
+        button_options = {
+            "fg": "white",  # Texte blanc pour un meilleur contraste
+            "activeforeground": "yellow",  # Texte jaune à l'activation pour un effet "glow"
+            "bd": 3,
+            "relief": RAISED
+        }
+
+        # Bouton pour charger image source (Vert pour Source)
+        Button(control_frame, text="Load Source", command=self.load_source, bg=SOURCE_COLOR, **button_options).grid(
+            row=0, column=0, padx=5)
+        # Bouton pour charger image cible (Rouge pour Target)
+        Button(control_frame, text="Load Target", command=self.load_target, bg=TARGET_COLOR, **button_options).grid(
+            row=0, column=1, padx=5)
+        # Bouton pour lancer le swap (Bleu)
+        Button(control_frame, text="Swap Faces", command=self.swap_faces, bg="#4A90E2", **button_options).grid(row=0,
+                                                                                                               column=2,
+                                                                                                               padx=5)
 
         # Bouton pour sauvegarder (désactivé au début)
-        self.save_button = Button(control_frame, text="Save Result", command=self.save_result, state=DISABLED)
+        self.save_button = Button(control_frame, text="Save Result", command=self.save_result, state=DISABLED,
+                                  bg="#A55F5F", **button_options)
         # Placement du bouton sauvegarde
         self.save_button.grid(row=0, column=3, padx=5)
 
-        # Bouton pour générer visage IA
-        Button(control_frame, text="Generate AI Face", command=self.generate_ai_face).grid(row=0, column=4, padx=5)
+        # Bouton pour générer visage IA (Jaune)
+        Button(control_frame, text="Generate AI Face", command=self.generate_ai_face, bg="#E2C04A",
+               **button_options).grid(row=0, column=4, padx=5)
         # Bouton capture webcam source
-        Button(control_frame, text="Webcam Source", command=lambda: self.capture_from_webcam(is_source=True)).grid(row=0, column=5, padx=5)
+        Button(control_frame, text="Webcam Source", command=lambda: self.capture_from_webcam(is_source=True),
+               bg=SOURCE_COLOR, **button_options).grid(row=0, column=5, padx=5)
         # Bouton capture webcam cible
-        Button(control_frame, text="Webcam Target", command=lambda: self.capture_from_webcam(is_source=False)).grid(row=0, column=6, padx=5)
+        Button(control_frame, text="Webcam Target", command=lambda: self.capture_from_webcam(is_source=False),
+               bg=TARGET_COLOR, **button_options).grid(row=0, column=6, padx=5)
         # Bouton pour mode swap vidéo
-        Button(control_frame, text="Live Swap Video", command=self.open_live_video).grid(row=0, column=7, padx=5)
+        # Button(control_frame, text="Live Swap Video", command=self.open_live_video).grid(row=0, column=7, padx=5)
 
         # Crée un cadre pour les réglages (blend/couleur)
-        settings_frame = Frame(control_frame)
+        settings_frame = Frame(control_frame, bg=THEME_BG)  # Applique la couleur de fond
         # L’affiche sous les boutons
         settings_frame.grid(row=1, column=0, columnspan=8, pady=5)
 
         # Label pour le réglage du blending
-        Label(settings_frame, text="Blend Amount:").grid(row=0, column=0)
+        Label(settings_frame, text="Blend Amount:", bg=THEME_BG, fg="white").grid(row=0, column=0,
+                                                                                  padx=5)  # Texte blanc
         # Curseur blending
-        self.blend_scale = Scale(settings_frame, from_=0, to=100, orient=HORIZONTAL, length=150)
+        self.blend_scale = Scale(settings_frame, from_=0, to=100, orient=HORIZONTAL, length=150, bg=THEME_BG,
+                                 fg="white", troughcolor=SOURCE_COLOR)  # Fond sombre, indicateur coloré
         # Valeur par défaut à 65
         self.blend_scale.set(65)
         # Placement du curseur
-        self.blend_scale.grid(row=0, column=1)
+        self.blend_scale.grid(row=0, column=1, padx=5)
         # Quand on relâche la souris → mise à jour du blending
         self.blend_scale.bind("<ButtonRelease-1>", self.update_blend)
 
         # Label pour réglage des couleurs
-        Label(settings_frame, text="Color Adjustment:").grid(row=0, column=2)
+        Label(settings_frame, text="Color Adjustment:", bg=THEME_BG, fg="white").grid(row=0, column=2,
+                                                                                      padx=5)  # Texte blanc
         # Curseur couleur
-        self.color_scale = Scale(settings_frame, from_=0, to=100, orient=HORIZONTAL, length=150)
+        self.color_scale = Scale(settings_frame, from_=0, to=100, orient=HORIZONTAL, length=150, bg=THEME_BG,
+                                 fg="white", troughcolor=TARGET_COLOR)  # Fond sombre, indicateur coloré
         # Valeur par défaut à 50
         self.color_scale.set(50)
         # Placement du curseur
-        self.color_scale.grid(row=0, column=3)
+        self.color_scale.grid(row=0, column=3, padx=5)
         # Quand on relâche la souris → mise à jour couleur
         self.color_scale.bind("<ButtonRelease-1>", self.update_color)
 
@@ -149,9 +182,12 @@ class FaceSwapApp:
         # Texte par défaut
         self.status_var.set("Ready to load images")
         # Label affichant le statut
-        status_bar = Label(self.root, textvariable=self.status_var, bd=1, relief=SUNKEN, anchor=W)
+        status_bar = Label(self.root, textvariable=self.status_var, bd=1, relief=SUNKEN, anchor=W, bg=ACCENT_COLOR,
+                           fg="black")
         # Positionné en bas de la fenêtre
         status_bar.pack(side=BOTTOM, fill=X)
+
+        # --- FIN DES MODIFICATIONS DE COULEUR ---
 
         # Boucle pour configurer les colonnes
         for i in range(3):
@@ -161,16 +197,23 @@ class FaceSwapApp:
         self.image_frame.rowconfigure(0, weight=1)
 
         # Fonction pour charger le détecteur de visage et les landmarks
+
     def load_models(self):
         try:
             # Détecteur de visages frontal (pré entraîné)
             self.detector = dlib.get_frontal_face_detector()
             # Nom du fichier du modèle de landmarks
+            # IMPORTANT: Le fichier 'shape_predictor_68_face_landmarks.dat' DOIT exister dans le même répertoire.
+            # Il est téléchargeable sur http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2 (décompressez-le)
             model_path = "shape_predictor_68_face_landmarks.dat"
             # Vérifie si le fichier existe
             if not os.path.exists(model_path):
                 # Lève une erreur si le modèle est manquant
-                raise FileNotFoundError("Dlib model file not found.")
+                messagebox.showerror("Model Load Error",
+                                     f"Dlib model file not found at: {model_path}. Please download it.")
+                # Ferme l'application si pas de modèle
+                self.root.destroy()
+                return
                 # Charge le modèle landmarks (68 points du visage)
             self.predictor = dlib.shape_predictor(model_path)
             # Si une erreur survient
@@ -181,6 +224,7 @@ class FaceSwapApp:
             self.root.destroy()
 
             # Fonction pour charger une image (source ou cible)
+
     def load_image(self, is_source=True):
         # Ouvre une boîte de dialogue pour choisir une image
         path = filedialog.askopenfilename(filetypes=[("Image Files", "*.jpg *.jpeg *.png")])
@@ -232,11 +276,13 @@ class FaceSwapApp:
         self.load_image(is_source=True)
 
         # Fonction qui charge l'image cible
+
     def load_target(self):
         # Appelle load_image avec False
         self.load_image(is_source=False)
 
         # Fonction pour capturer une image depuis la webcam
+
     def capture_from_webcam(self, is_source=True):
         # Ouvre la webcam (0 = webcam par défaut)
         cap = cv2.VideoCapture(0)
@@ -297,7 +343,6 @@ class FaceSwapApp:
             if self.source_image is not None and self.target_image is not None:
                 self.status_var.set("Ready to perform face swap.")
                 # sprint 2 finished
-
 
     # sprint 3 generate foto from ai
     # Fonction pour générer un visage IA
@@ -370,6 +415,7 @@ class FaceSwapApp:
         return np.array([(p.x, p.y) for p in shape.parts()], dtype=np.int32)
 
         # Fonction qui crée un masque pour la zone du visage
+
     def create_mask(self, landmarks, shape):
         # Calcule l'enveloppe convexe des points du visage (contour global)
         hull = cv2.convexHull(landmarks)
@@ -383,6 +429,7 @@ class FaceSwapApp:
         return mask[..., np.newaxis]
 
         # Fonction pour ajuster les couleurs du visage source sur la cible
+
     def adjust_colors(self, src, target, amount):
         # Si pas d’ajustement demandé
         if amount == 0:
@@ -408,7 +455,7 @@ class FaceSwapApp:
             # Normalise l’image source
             normalized = (src_lab - src_mean) / src_std
             adjusted = normalized * ((1 - amount) * src_std + amount * tgt_std) + \
-                       ((1 - amount) * src_mean + amount * tgt_mean)   # Applique un mélange stats source/cible
+                       ((1 - amount) * src_mean + amount * tgt_mean)  # Applique un mélange stats source/cible
             # Recadre valeurs entre 0 et 255
             adjusted = np.clip(adjusted, 0, 255).astype(np.uint8)
             # Reconvertit en BGR
@@ -419,114 +466,118 @@ class FaceSwapApp:
             messagebox.showerror("Error", f"Color adjustment failed: {str(e)}")
             # Retourne l’image source non modifiée
             return src
-            #print({str(e)})
+            # print({str(e)})
 
         # Fonction qui effectue le face swap
-        def swap_faces(self):
-            # Vérifie si les deux images existent
-            if self.source_image is None or self.target_image is None:
-                # Erreur si non
-                messagebox.showerror("Error", "Please load both source and target images.")
-                return
 
-            # Message statut
-            self.status_var.set("Processing... Please wait.")
-            # Change curseur en sablier
-            self.root.config(cursor="watch")
-            # Rafraîchit interface
-            self.root.update()
+    def swap_faces(self):
+        # Vérifie si les deux images existent
+        if self.source_image is None or self.target_image is None:
+            # Erreur si non
+            messagebox.showerror("Error", "Please load both source and target images.")
+            return
 
+        # Message statut
+        self.status_var.set("Processing... Please wait.")
+        # Change curseur en sablier
+        self.root.config(cursor="watch")
+        # Rafraîchit interface
+        self.root.update()
+
+        try:
+            src_points = self.get_landmarks(self.source_image)  # Récupère landmarks image source
+            tgt_points = self.get_landmarks(self.target_image)  # Récupère landmarks image cible
+
+            if src_points is None or tgt_points is None:  # Si un visage n’a pas été trouvé
+                raise ValueError("Face not detected in one or both images.")  # Erreur
+
+            mask = self.create_mask(tgt_points, self.target_image.shape)  # Crée le masque de la cible
+            matrix, _ = cv2.estimateAffinePartial2D(src_points,
+                                                    tgt_points)  # Calcule la transformation affine (source→cible)
+            warped_src = cv2.warpAffine(self.source_image, matrix,
+                                        (self.target_image.shape[1],
+                                         self.target_image.shape[0]))  # Applique la transformation
+
+            self.warped_src = warped_src  # Sauvegarde l’image source transformée
+            self.mask = mask  # Sauvegarde le masque
+            self.src_points = src_points  # Sauvegarde points source
+            self.tgt_points = tgt_points  # Sauvegarde points cible
+
+            self.update_face_swap()  # Applique le blending et couleurs
+        except Exception as e:  # Si erreur
+            messagebox.showerror("Error", f"Face swap failed: {str(e)}")  # Message erreur
+            self.status_var.set("Face swap failed.")  # Statut mis à jour
+        finally:
+            self.root.config(cursor="")  # Remet le curseur normal
+
+    def update_face_swap(self):  # Fonction qui met à jour le swap (blending/couleurs)
+        if not hasattr(self, 'warped_src'):  # Vérifie qu’il y a une image transformée
+            return
+
+        try:
+            blend_amount = self.blend_scale.get() / 100.0  # Récupère valeur blending (0-1)
+            color_amount = self.color_scale.get() / 100.0  # Récupère valeur ajustement couleur (0-1)
+
+            if color_amount > 0:  # Si on ajuste les couleurs
+                color_adjusted = self.adjust_colors(self.warped_src, self.target_image,
+                                                    color_amount)  # Applique correction couleur
+            else:
+                color_adjusted = self.warped_src  # Sinon prend direct l’image transformée
+
+            mask_3ch = np.repeat(self.mask, 3, axis=2)  # Étend le masque en 3 canaux
+            blended = (color_adjusted * mask_3ch + self.target_image * (1 - mask_3ch)).astype(
+                np.uint8)  # Mélange source et cible
+            self.result_image = (blended * blend_amount + self.target_image * (1 - blend_amount)).astype(
+                np.uint8)  # Applique blending global
+
+            self.show_result()  # Affiche le résultat
+            self.save_button.config(state=NORMAL)  # Active le bouton sauvegarde
+            self.status_var.set("Face swap completed.")  # Statut succès
+        except Exception as e:  # Si erreur
+            messagebox.showerror("Error", f"Update failed: {str(e)}")  # Message erreur
+
+    def update_blend(self, event=None):  # Fonction appelée quand on change blending
+        if hasattr(self, 'result_image'):  # Vérifie qu’il y a un résultat
+            self.update_face_swap()  # Recalcule le résultat
+
+    def update_color(self, event=None):  # Fonction appelée quand on change la couleur
+        if hasattr(self, 'result_image'):  # Vérifie qu’il y a un résultat
+            self.update_face_swap()  # Recalcule le résultat
+
+    def show_image(self, image, label_widget):  # Fonction pour afficher une image dans Tkinter
+        rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convertit en RGB (Tkinter utilise PIL en RGB)
+        h, w = rgb.shape[:2]  # Récupère hauteur et largeur
+        scale = min(self.display_width / w, self.display_height / h)  # Calcule l’échelle d’affichage
+        resized = cv2.resize(rgb, (int(w * scale), int(h * scale)))  # Redimensionne l’image
+        img_tk = ImageTk.PhotoImage(image=Image.fromarray(resized))  # Convertit en format Tkinter
+        label_widget.config(image=img_tk)  # Associe l’image au widget label
+        label_widget.image = img_tk  # Sauvegarde une référence pour éviter le garbage collector
+
+    def show_result(self):  # Fonction qui affiche le résultat
+        self.result_frame.grid(row=0, column=2, padx=5, pady=5, sticky="nsew")  # Affiche le cadre résultat
+        self.image_frame.columnconfigure(2, weight=1)  # Redimensionne la colonne résultat
+        self.show_image(self.result_image, self.result_label)  # Affiche l’image résultat dans le label
+
+    def save_result(self):  # Fonction pour sauvegarder le résultat
+        if not hasattr(self, 'result_image'):  # Si aucun résultat
+            messagebox.showerror("Error", "No result image to save.")  # Message erreur
+            return
+        default_name = f"swap_{os.path.basename(self.source_path)}_{os.path.basename(self.target_path)}"  # Nom par défaut
+        path = filedialog.asksaveasfilename(  # Ouvre boîte de dialogue pour choisir où sauvegarder
+            initialfile=default_name,  # Nom par défaut
+            defaultextension=".jpg",  # Extension par défaut
+            filetypes=[("JPEG", "*.jpg"), ("PNG", "*.png")]  # Types de fichiers autorisés
+        )
+        if path:  # Si utilisateur a choisi un chemin
             try:
-                src_points = self.get_landmarks(self.source_image)   # Récupère landmarks image source
-                tgt_points = self.get_landmarks(self.target_image)   # Récupère landmarks image cible
-
-                if src_points is None or tgt_points is None:   # Si un visage n’a pas été trouvé
-                    raise ValueError("Face not detected in one or both images.")   # Erreur
-
-                mask = self.create_mask(tgt_points, self.target_image.shape)   # Crée le masque de la cible
-                matrix, _ = cv2.estimateAffinePartial2D(src_points, tgt_points)   # Calcule la transformation affine (source→cible)
-                warped_src = cv2.warpAffine(self.source_image, matrix,
-                                            (self.target_image.shape[1], self.target_image.shape[0]))   # Applique la transformation
-
-                self.warped_src = warped_src   # Sauvegarde l’image source transformée
-                self.mask = mask   # Sauvegarde le masque
-                self.src_points = src_points   # Sauvegarde points source
-                self.tgt_points = tgt_points   # Sauvegarde points cible
-
-                self.update_face_swap()   # Applique le blending et couleurs
-            except Exception as e:   # Si erreur
-                messagebox.showerror("Error", f"Face swap failed: {str(e)}")   # Message erreur
-                self.status_var.set("Face swap failed.")   # Statut mis à jour
-            finally:
-                self.root.config(cursor="")   # Remet le curseur normal
-
-        def update_face_swap(self):   # Fonction qui met à jour le swap (blending/couleurs)
-            if not hasattr(self, 'warped_src'):   # Vérifie qu’il y a une image transformée
-                return
-
-            try:
-                blend_amount = self.blend_scale.get() / 100.0   # Récupère valeur blending (0-1)
-                color_amount = self.color_scale.get() / 100.0   # Récupère valeur ajustement couleur (0-1)
-
-                if color_amount > 0:   # Si on ajuste les couleurs
-                    color_adjusted = self.adjust_colors(self.warped_src, self.target_image, color_amount)   # Applique correction couleur
-                else:
-                    color_adjusted = self.warped_src   # Sinon prend direct l’image transformée
-
-                mask_3ch = np.repeat(self.mask, 3, axis=2)   # Étend le masque en 3 canaux
-                blended = (color_adjusted * mask_3ch + self.target_image * (1 - mask_3ch)).astype(np.uint8)   # Mélange source et cible
-                self.result_image = (blended * blend_amount + self.target_image * (1 - blend_amount)).astype(np.uint8)   # Applique blending global
-
-                self.show_result()   # Affiche le résultat
-                self.save_button.config(state=NORMAL)   # Active le bouton sauvegarde
-                self.status_var.set("Face swap completed.")   # Statut succès
-            except Exception as e:   # Si erreur
-                messagebox.showerror("Error", f"Update failed: {str(e)}")   # Message erreur
+                cv2.imwrite(path, self.result_image)  # Sauvegarde l’image
+                messagebox.showinfo("Saved", f"Image saved at:\n{path}")  # Message succès
+                self.status_var.set(f"Saved to {os.path.basename(path)}")  # Met à jour le statut
+            except Exception as e:  # Si erreur
+                messagebox.showerror("Save Error", str(e))  # Message erreur
 
 
-        def update_blend(self, event=None):   # Fonction appelée quand on change blending
-            if hasattr(self, 'result_image'):   # Vérifie qu’il y a un résultat
-                self.update_face_swap()   # Recalcule le résultat
-
-        def update_color(self, event=None):   # Fonction appelée quand on change la couleur
-            if hasattr(self, 'result_image'):   # Vérifie qu’il y a un résultat
-                self.update_face_swap()   # Recalcule le résultat
-
-
-        def show_image(self, image, label_widget):   # Fonction pour afficher une image dans Tkinter
-            rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)   # Convertit en RGB (Tkinter utilise PIL en RGB)
-            h, w = rgb.shape[:2]   # Récupère hauteur et largeur
-            scale = min(self.display_width / w, self.display_height / h)   # Calcule l’échelle d’affichage
-            resized = cv2.resize(rgb, (int(w * scale), int(h * scale)))   # Redimensionne l’image
-            img_tk = ImageTk.PhotoImage(image=Image.fromarray(resized))   # Convertit en format Tkinter
-            label_widget.config(image=img_tk)   # Associe l’image au widget label
-            label_widget.image = img_tk   # Sauvegarde une référence pour éviter le garbage collector
-
-        def show_result(self):   # Fonction qui affiche le résultat
-            self.result_frame.grid(row=0, column=2, padx=5, pady=5, sticky="nsew")   # Affiche le cadre résultat
-            self.image_frame.columnconfigure(2, weight=1)   # Redimensionne la colonne résultat
-            self.show_image(self.result_image, self.result_label)   # Affiche l’image résultat dans le label
-
-
-        def save_result(self):   # Fonction pour sauvegarder le résultat
-            if not hasattr(self, 'result_image'):   # Si aucun résultat
-                messagebox.showerror("Error", "No result image to save.")   # Message erreur
-                return
-            default_name = f"swap_{os.path.basename(self.source_path)}_{os.path.basename(self.target_path)}"   # Nom par défaut
-            path = filedialog.asksaveasfilename(   # Ouvre boîte de dialogue pour choisir où sauvegarder
-                initialfile=default_name,          # Nom par défaut
-                defaultextension=".jpg",           # Extension par défaut
-                filetypes=[("JPEG", "*.jpg"), ("PNG", "*.png")]   # Types de fichiers autorisés
-            )
-            if path:   # Si utilisateur a choisi un chemin
-                try:
-                    cv2.imwrite(path, self.result_image)   # Sauvegarde l’image
-                    messagebox.showinfo("Saved", f"Image saved at:\n{path}")   # Message succès
-                    self.status_var.set(f"Saved to {os.path.basename(path)}")   # Met à jour le statut
-                except Exception as e:   # Si erreur
-                    messagebox.showerror("Save Error", str(e))   # Message erreur
-
-    if __name__ == "__main__":   # Point d'entrée du programme
-        root = Tk()              # Crée une fenêtre Tkinter
-        app = FaceSwapApp(root)  # Crée l'application FaceSwap
-        root.mainloop()          # Lance la boucle principale Tkinter (interface interactive)
+if __name__ == "__main__":  # Point d'entrée du programme
+    root = Tk()  # Crée une fenêtre Tkinter
+    app = FaceSwapApp(root)  # Crée l'application FaceSwap
+    root.mainloop()  # Lance la boucle principale Tkinter (interface interactive)
