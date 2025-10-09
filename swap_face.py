@@ -17,6 +17,9 @@ import urllib.request
 # Importation de uuid pour générer des identifiants uniques (utile pour nommer des fichiers)
 import uuid
 
+from swap_live_video_advance import FaceSwapApp
+
+
 # Définition d'une classe qui représente toute l'application de Face Swap
 class FaceSwapApp:
     # Constructeur, appelé à la création de l'objet
