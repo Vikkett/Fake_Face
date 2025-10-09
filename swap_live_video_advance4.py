@@ -154,10 +154,12 @@ class FaceSwapApp:
                            font=("Arial", 10))
         status_bar.pack(side=BOTTOM, fill=X)
 
+        # configuration des colonnes pour que l'affiche s'adapte
         for i in range(3):
             self.image_frame.columnconfigure(i, weight=1)
         self.image_frame.rowconfigure(0, weight=1)
 
+    # Définir les boutons quand le souris passe dessus
     def make_button(self, parent, text, command, color="#4a4a4a", icon=None):
         button = Button(
             parent,
@@ -174,19 +176,29 @@ class FaceSwapApp:
             image=icon,
             compound=LEFT
         )
+        # La couleur de fond est temporairement assombrie via la méthode self.darken_color
         button.bind("<Enter>", lambda e: button.config(bg=self.darken_color(color, 20)))
+        # Devient la couleur originale
         button.bind("<Leave>", lambda e: button.config(bg=color))
         return button
 
+    # La fonction pour créer des effets de survol (hover effects) en format hexadécimal
     def darken_color(self, hex_color, amount):
         hex_color = hex_color.lstrip('#')
+        # la chaîne est divisée en trois parties (RR, GG, BB), chaque paire est convertie d'une base 16
         rgb = tuple(int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
+        # Garantir que la valeur minimale est o pour éviter les nombres négatifs qui sont invalides
         darkened_rgb = tuple(max(0, c - amount) for c in rgb)
+        # %02x formate chaque entier RVB en chaîne hexadécimale de deux caractères
+        # # au début pour obtenir le format #RRGGBB
         return '#%02x%02x%02x' % darkened_rgb
 
+    # Méthode qui charge les modèles de détection
     def load_models(self):
         try:
+            # Crée un détecteur de visage frontal basé sur dlib
             self.detector = dlib.get_frontal_face_detector()
+            # Nom du fichier contenant le modèle des 68 points du visage
             model_path = "shape_predictor_68_face_landmarks.dat"
             if not os.path.exists(model_path):
                 raise FileNotFoundError(
@@ -196,7 +208,9 @@ class FaceSwapApp:
             messagebox.showerror("Model Load Error", str(e))
             self.root.destroy()
 
+    # Méthode pour charger une image (source ou cible)
     def load_image(self, is_source=True):
+        # Ouvre une boîte de dialogue pour choisir une image
         path = filedialog.askopenfilename(filetypes=[("Image Files", "*.jpg *.jpeg *.png")])
         if not path:
             return
@@ -260,7 +274,7 @@ class FaceSwapApp:
         except Exception as e:
             messagebox.showerror("Error", f"Failed to load celebrity image: {str(e)}")
 
-
+    # Méthode pour capturer une photo depuis la webcam
     def capture_from_webcam(self, is_source=True):
         cap = cv2.VideoCapture(0)
         if not cap.isOpened():
@@ -300,19 +314,23 @@ class FaceSwapApp:
             if self.source_image is not None and self.target_image is not None:
                 self.status_var.set("Ready to perform face swap.")
 
+    # Méthode pour télécharger et utiliser un visage généré par IA
     def generate_ai_face(self):
         try:
             self.status_var.set("Downloading AI face...")
             self.root.config(cursor="watch")
             self.root.update()
 
+            # URL du site qui génère un visage aléatoire
             url = "https://thispersondoesnotexist.com/"
             folder = os.path.join(os.getcwd(), "ai_faces")
             os.makedirs(folder, exist_ok=True)
 
+            # Génère un nom unique pour l’image avec uuid
             filename = f"ai_face_{uuid.uuid4().hex[:8]}.jpg"
             filepath = os.path.join(folder, filename)
 
+            # Télécharge l’image et l’enregistre
             urllib.request.urlretrieve(url, filepath)
             image = cv2.imread(filepath)
 
