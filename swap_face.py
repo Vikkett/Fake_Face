@@ -130,7 +130,7 @@ class FaceSwapApp:
 
         # Bouton pour sauvegarder (désactivé au début)
         self.save_button = Button(control_frame, text="Save Result", command=self.save_result, state=DISABLED,
-                                  bg="#A55F5F", **button_options)
+                                  bg="", **button_options)
         # Placement du bouton sauvegarde
         self.save_button.grid(row=0, column=3, padx=5)
 
