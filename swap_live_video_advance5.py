@@ -1,7 +1,7 @@
 import cv2  # bibliothèque OpenCV pour le traitement d'image et la vidéo
 import numpy as np  # pour manipulation de tableaux et matrices
 import dlib  # la détection et le repérage des points clés du visage
-from tkinter import * # pour créer l'interface graphique
+from tkinter import *  # pour créer l'interface graphique
 from tkinter import filedialog, messagebox, simpledialog  # boîte de dialogue de fichiers et messages
 from PIL import Image, ImageTk, ImageDraw, ImageFont  # gérer l'affichage des images
 import os  # la gestion des fichiers et dossiers
@@ -60,97 +60,100 @@ class FaceSwapApp:
         self.root.title("Professional Face Swap v2.3")
         self.root.geometry("1200x800")
         self.root.minsize(1000, 700)
-        # CHANGED: #e9ebee -> #36454F (Charcoal)
         self.root.configure(bg="#36454F")
 
         # crée un conteneur principal
-        # CHANGED: #e9ebee -> #36454F (Charcoal)
         main_frame = Frame(self.root, bg="#36454F")
         # Place le conteneur dans la fenêtre avec marges
         main_frame.pack(fill=BOTH, expand=True, padx=20, pady=20)
 
         # === Image Frames ===
-        # CHANGED: #e9ebee -> #36454F (Charcoal)
         self.image_frame = Frame(main_frame, bg="#36454F")
         # L'affiche en remplissant l'espace disponible
         self.image_frame.pack(fill=BOTH, expand=True)
 
-        # CHANGED: white -> #F0F8FF (Alice Blue)
-        # CHANGED: Default LabelFrame text color (fg) from black to a darker shade for better contrast with the new bg
         self.source_frame = LabelFrame(self.image_frame, text="Source Image", font=("Arial", 12, "bold"), bg="#F0F8FF",
                                        bd=2, relief=GROOVE, fg="#333333")
         self.source_frame.grid(row=0, column=0, padx=15, pady=15, sticky="nsew")
-        # CHANGED: white -> #F0F8FF (Alice Blue)
         self.source_label = Label(self.source_frame, bg="#F0F8FF", text="Load a source image", font=("Arial", 11),
                                   fg="#555")
         self.source_label.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-        # CHANGED: white -> #F0F8FF (Alice Blue)
         self.target_frame = LabelFrame(self.image_frame, text="Target Image", font=("Arial", 12, "bold"), bg="#F0F8FF",
                                        bd=2, relief=GROOVE, fg="#333333")
         self.target_frame.grid(row=0, column=1, padx=15, pady=15, sticky="nsew")
-        # CHANGED: white -> #F0F8FF (Alice Blue)
         self.target_label = Label(self.target_frame, bg="#F0F8FF", text="Load a target image", font=("Arial", 11),
                                   fg="#555")
         self.target_label.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-        # CHANGED: white -> #F0F8FF (Alice Blue)
         self.result_frame = LabelFrame(self.image_frame, text="Result Image", font=("Arial", 12, "bold"), bg="#F0F8FF",
                                        bd=2, relief=GROOVE, fg="#333333")
         self.result_frame.grid(row=0, column=2, padx=15, pady=15, sticky="nsew")
-        # CHANGED: white -> #F0F8FF (Alice Blue)
         self.result_label = Label(self.result_frame, bg="#F0F8FF", text="Swapped image will appear here",
                                   font=("Arial", 11), fg="#555")
         self.result_label.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
         # === Control Panel ===
-        # CHANGED: #e9ebee -> #36454F (Charcoal)
+        # Changed this section to use grid for better button visibility on resize
         control_frame = Frame(main_frame, bg="#36454F")
+        # Use grid for the control frame to allow wrapping
         control_frame.pack(fill=X, pady=10)
 
-        # Crée un groupe de boutons pour les entées (input)
-        # CHANGED: #e9ebee -> #36454F (Charcoal)
-        input_buttons = Frame(control_frame, bg="#36454F")
-        input_buttons.pack(side=LEFT, padx=10)
-        # Crée des boutons avec ces fonctionnalités
-        # CHANGED: #4a4a4a (in make_button default) -> #4682B4 (Steel Blue)
-        self.make_button(input_buttons, "Load Source", self.load_source, color="#4682B4", icon=self.icon_load).pack(side=LEFT, padx=5)
-        self.make_button(input_buttons, "Load Target", self.load_target, color="#4682B4", icon=self.icon_load).pack(side=LEFT, padx=5)
-        self.make_button(input_buttons, "Webcam Source", lambda: self.capture_from_webcam(is_source=True),
-                         color="#4682B4", icon=self.icon_webcam).pack(side=LEFT, padx=5)
-        self.make_button(input_buttons, "Webcam Target", lambda: self.capture_from_webcam(is_source=False),
-                         color="#4682B4", icon=self.icon_webcam).pack(side=LEFT, padx=5)
-        self.make_button(input_buttons, "Generate AI Face", self.generate_ai_face, color="#4682B4", icon=self.icon_ai).pack(side=LEFT,
-                                                                                                           padx=5)
-        # Crée un groupe de boutons pour les actions (output)
-        # CHANGED: #e9ebee -> #36454F (Charcoal)
-        action_buttons = Frame(control_frame, bg="#36454F")
-        action_buttons.pack(side=RIGHT, padx=10)
-        # Button colors (Swap, Live Swap, Save, Email) are kept as their original specific colors for visual cue.
-        # Bouton pour échanger les visage entre source et cible
-        self.make_button(action_buttons, "Swap Faces", self.swap_faces, "#3498db", icon=self.icon_swap).pack(side=LEFT,
-                                                                                                             padx=5)
-        self.make_button(action_buttons, "Live Swap", self.open_live_video, "#ff9800", icon=self.icon_swap).pack(
-            side=LEFT, padx=5)
-        self.save_button = self.make_button(action_buttons, "Save Result", self.save_result, "#2ecc71",
+        # Crée un conteneur qui s'étire au milieu pour tous les boutons
+        all_buttons_frame = Frame(control_frame, bg="#36454F")
+        # Use grid for the main button container to center and expand
+        all_buttons_frame.pack(expand=True)
+
+        # Configure button container to expand
+        for i in range(9):  # 5 input + 4 output buttons = 9 columns total
+            all_buttons_frame.columnconfigure(i, weight=1)
+
+        # Input Buttons (Row 0)
+        # Use grid to place all buttons in a single, wrapping layout
+        # The key is to keep them close together and let the grid manager handle alignment.
+
+        # Row 0: Input Buttons
+        self.make_button(all_buttons_frame, "Load Source", self.load_source, color="#4682B4", icon=self.icon_load).grid(
+            row=0, column=0, padx=5, pady=5)
+        self.make_button(all_buttons_frame, "Load Target", self.load_target, color="#4682B4", icon=self.icon_load).grid(
+            row=0, column=1, padx=5, pady=5)
+        self.make_button(all_buttons_frame, "Webcam Source", lambda: self.capture_from_webcam(is_source=True),
+                         color="#4682B4", icon=self.icon_webcam).grid(row=0, column=2, padx=5, pady=5)
+        self.make_button(all_buttons_frame, "Webcam Target", lambda: self.capture_from_webcam(is_source=False),
+                         color="#4682B4", icon=self.icon_webcam).grid(row=0, column=3, padx=5, pady=5)
+        self.make_button(all_buttons_frame, "Generate AI Face", self.generate_ai_face, color="#4682B4",
+                         icon=self.icon_ai).grid(row=0, column=4, padx=5, pady=5)
+
+        # Row 1: Action Buttons (These buttons will "wrap" below the inputs when the window is small)
+        self.make_button(all_buttons_frame, "Swap Faces", self.swap_faces, "#3498db", icon=self.icon_swap).grid(row=1,
+                                                                                                                column=2,
+                                                                                                                padx=5,
+                                                                                                                pady=5,
+                                                                                                                sticky="ew")
+        self.make_button(all_buttons_frame, "Live Swap", self.open_live_video, "#ff9800", icon=self.icon_swap).grid(
+            row=1, column=3, padx=5, pady=5, sticky="ew")
+        self.save_button = self.make_button(all_buttons_frame, "Save Result", self.save_result, "#2ecc71",
                                             icon=self.icon_save)
-        self.save_button.pack(side=LEFT, padx=5)
+        self.save_button.grid(row=1, column=4, padx=5, pady=5, sticky="ew")
         self.save_button.config(state=DISABLED)
-        self.email_button = self.make_button(action_buttons, "Email Result", self.email_result, "#e74c3c",
+        self.email_button = self.make_button(all_buttons_frame, "Email Result", self.email_result, "#e74c3c",
                                              icon=self.icon_mail)
-        self.email_button.pack(side=LEFT, padx=5)
+        self.email_button.grid(row=1, column=5, padx=5, pady=5, sticky="ew")
         self.email_button.config(state=DISABLED)
 
+        # Padder columns to keep the buttons somewhat centered when wide (optional, but helpful)
+        all_buttons_frame.columnconfigure(6, weight=1)
+        all_buttons_frame.columnconfigure(7, weight=1)
+        all_buttons_frame.columnconfigure(8, weight=1)
+
         # === Settings ===
-        # CHANGED: white -> #F0F8FF (Alice Blue)
-        settings_frame = LabelFrame(main_frame, text="Advanced Settings", font=("Arial", 12, "bold"), bg="#F0F8FF", bd=2,
+        settings_frame = LabelFrame(main_frame, text="Advanced Settings", font=("Arial", 12, "bold"), bg="#F0F8FF",
+                                    bd=2,
                                     relief=GROOVE, fg="#333333")
         settings_frame.pack(fill=X, pady=15, padx=10)
 
-        # CHANGED: white -> #F0F8FF (Alice Blue)
         blend_frame = Frame(settings_frame, bg="#F0F8FF")
         blend_frame.pack(side=LEFT, padx=20, pady=10)
-        # CHANGED: white -> #F0F8FF (Alice Blue)
         Label(blend_frame, text="Blend Amount", bg="#F0F8FF", font=("Arial", 10)).pack()
         self.blend_scale = Scale(blend_frame, from_=0, to=100, orient=HORIZONTAL, length=200, bg="#f0f2f5", bd=0,
                                  highlightthickness=0, troughcolor="#bdc3c7")
@@ -158,10 +161,8 @@ class FaceSwapApp:
         self.blend_scale.pack()
         self.blend_scale.bind("<ButtonRelease-1>", self.update_face_swap_event)
 
-        # CHANGED: white -> #F0F8FF (Alice Blue)
         color_frame = Frame(settings_frame, bg="#F0F8FF")
         color_frame.pack(side=LEFT, padx=20, pady=10)
-        # CHANGED: white -> #F0F8FF (Alice Blue)
         Label(color_frame, text="Color Adjustment", bg="#F0F8FF", font=("Arial", 10)).pack()
         self.color_scale = Scale(color_frame, from_=0, to=100, orient=HORIZONTAL, length=200, bg="#f0f2f5", bd=0,
                                  highlightthickness=0, troughcolor="#bdc3c7")
@@ -172,9 +173,8 @@ class FaceSwapApp:
         # === Status Bar ===
         self.status_var = StringVar()
         self.status_var.set("Ready to load images...")
-        # CHANGED: white -> #DCDCDC (Light Gray)
         status_bar = Label(self.root, textvariable=self.status_var, bd=1, relief=SUNKEN, anchor=W, bg="#DCDCDC",
-                           font=("Arial", 10), fg="#333") # Added fg for readability on light gray
+                           font=("Arial", 10), fg="#333")
         status_bar.pack(side=BOTTOM, fill=X)
 
         # configuration des colonnes pour que l'affiche s'adapte
@@ -184,9 +184,8 @@ class FaceSwapApp:
 
     # Définir les boutons quand le souris passe dessus
     def make_button(self, parent, text, command, color="#4a4a4a", icon=None):
-        # CHANGED: #4a4a4a (default in original function) -> #4682B4 (Steel Blue)
         if color == "#4a4a4a":
-             color = "#4682B4"
+            color = "#4682B4"
 
         button = Button(
             parent,
