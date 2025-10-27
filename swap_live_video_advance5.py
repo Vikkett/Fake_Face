@@ -344,10 +344,31 @@ class FaceSwapApp:
 
     def create_mask(self, landmarks, shape):
         hull = cv2.convexHull(landmarks)
+
+        # 🌟 NOUVEAU: Élargissement simple du convex hull pour inclure plus de zone de peau
+        # Calcule le centre du hull
+        M = cv2.moments(hull)
+        if M['m00'] == 0:
+            return np.ones(shape[:2], dtype=np.float32)[..., np.newaxis]  # Fallback
+
+        cX = int(M['m10'] / M['m00'])
+        cY = int(M['m01'] / M['m00'])
+
+        # Élargit le hull de 15% (ajustable) en éloignant les points du centre
+        scale_factor = 1.15
+        hull_expanded = np.array([
+            [
+                cX + int((point[0][0] - cX) * scale_factor),
+                cY + int((point[0][1] - cY) * scale_factor)
+            ]
+            for point in hull
+        ])
+
         mask = np.zeros(shape[:2], dtype=np.float32)
-        cv2.fillConvexPoly(mask, hull, 1.0)
-        # Augmenter le flou pour un blending encore plus doux sur les bords
-        mask = cv2.GaussianBlur(mask, (21, 21), 0)
+        cv2.fillConvexPoly(mask, hull_expanded, 1.0)  # Utilise le hull élargi
+
+        # Flou plus grand pour une transition encore plus douce (25x25)
+        mask = cv2.GaussianBlur(mask, (25, 25), 0)
         return mask[..., np.newaxis]
 
     def adjust_colors(self, src, target, amount):
@@ -359,8 +380,13 @@ class FaceSwapApp:
             target_lab = cv2.cvtColor(target, cv2.COLOR_BGR2LAB).astype(np.float32)
 
             # Calcule la moyenne et l'écart-type
-            src_mean, src_std = cv2.meanStdDev(src_lab)
-            tgt_mean, tgt_std = cv2.meanStdDev(target_lab)
+            # 💡 IMPORTANT: Utilise un masque pour NE CALCULER LES STATISTIQUES QUE SUR LE VISAGE CIBLE.
+            # (Pour le src, on utilise le warped_src qui est déjà répliqué pour éviter le noir)
+            mask_target = self.mask.astype(np.uint8) * 255  # Réutiliser le masque existant pour la cible
+
+            tgt_mean, tgt_std = cv2.meanStdDev(target_lab, mask=mask_target)
+            src_mean, src_std = cv2.meanStdDev(
+                src_lab)  # Le warped_src utilise BORDER_REPLICATE, les stats sont donc ok
 
             src_mean, src_std = src_mean.flatten(), src_std.flatten()
             tgt_mean, tgt_std = tgt_mean.flatten(), tgt_std.flatten()
@@ -368,15 +394,11 @@ class FaceSwapApp:
             src_std[src_std == 0] = 1.0
 
             # Interpolation des statistiques entre source et cible
-            # On utilise le 'amount' pour pondérer la contribution de la cible (cible.stat) vs source (src.stat)
-            # Cette formule est la plus courante pour le transfert de couleur
             normalized = (src_lab - src_mean) / src_std
 
-            # Blend les statistiques:
             target_std_blended = ((1 - amount) * src_std + amount * tgt_std)
             target_mean_blended = ((1 - amount) * src_mean + amount * tgt_mean)
 
-            # Nouvelle image ajustée
             adjusted = normalized * target_std_blended + target_mean_blended
 
             # Limite les valeurs et reconvertit en BGR uint8
@@ -411,11 +433,11 @@ class FaceSwapApp:
             # Calcule la matrice de transformation affine
             matrix, _ = cv2.estimateAffinePartial2D(src_points.astype(np.float32), tgt_points.astype(np.float32))
 
-            # Applique la transformation à l'image source
+            # 🌟 CORRECTION CRUCIALE : Utilisation de BORDER_REPLICATE pour éviter les bords noirs.
             warped_src = cv2.warpAffine(self.source_image, matrix,
                                         (self.target_image.shape[1], self.target_image.shape[0]),
                                         flags=cv2.INTER_LINEAR,
-                                        borderMode=cv2.BORDER_REPLICATE)
+                                        borderMode=cv2.BORDER_REPLICATE)  # <-- Ceci évite le noir
 
             # Stocke les résultats du swap initial pour les mises à jour
             self.warped_src = warped_src
@@ -432,10 +454,6 @@ class FaceSwapApp:
             self.root.config(cursor="")
 
     def update_face_swap(self):
-        """
-        Met à jour l'image finale en appliquant le Blend Amount comme Opacité
-        sur le visage swappé, masqué par le soft mask, APRES ajustement de couleur.
-        """
         if self.warped_src is None or self.mask is None:
             return
 
@@ -445,6 +463,7 @@ class FaceSwapApp:
 
             # 1. Ajustement des couleurs sur la source déformée
             if color_amount > 0:
+                # La fonction adjust_colors utilise self.mask pour calculer les stats de la cible
                 color_adjusted = self.adjust_colors(self.warped_src, self.target_image, color_amount)
             else:
                 color_adjusted = self.warped_src
@@ -618,8 +637,12 @@ class FaceSwapApp:
             return frame
 
         matrix, _ = cv2.estimateAffinePartial2D(src_landmarks.astype(np.float32), tgt_landmarks.astype(np.float32))
-        warped_src = cv2.warpAffine(source_image, matrix, (frame.shape[1], frame.shape[0]))
 
+        # Utilisation de BORDER_REPLICATE pour le live swap aussi
+        warped_src = cv2.warpAffine(source_image, matrix, (frame.shape[1], frame.shape[0]),
+                                    borderMode=cv2.BORDER_REPLICATE)
+
+        # Création du masque (simple) pour le live
         hull = cv2.convexHull(tgt_landmarks)
         mask = np.zeros(frame.shape[:2], dtype=np.uint8)
         cv2.fillConvexPoly(mask, hull, 255)
@@ -627,7 +650,7 @@ class FaceSwapApp:
 
         mask3 = cv2.merge([mask, mask, mask]) / 255.0
 
-        # Blend (simple)
+        # Blend
         blended = (warped_src.astype(np.float32) * mask3 + frame.astype(np.float32) * (1 - mask3)).astype(np.uint8)
 
         return blended
