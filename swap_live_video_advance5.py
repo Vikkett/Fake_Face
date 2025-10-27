@@ -1,7 +1,7 @@
 import cv2  # bibliothèque OpenCV pour le traitement d'image et la vidéo
 import numpy as np  # pour manipulation de tableaux et matrices
 import dlib  # la détection et le repérage des points clés du visage
-from tkinter import *  # pour créer l'interface graphique
+from tkinter import * # pour créer l'interface graphique
 from tkinter import filedialog, messagebox, simpledialog  # boîte de dialogue de fichiers et messages
 from PIL import Image, ImageTk, ImageDraw, ImageFont  # gérer l'affichage des images
 import os  # la gestion des fichiers et dossiers
@@ -19,18 +19,6 @@ class FaceSwapApp:
     def __init__(self, root):
         self.root = root
 
-        # Couleur de fond principal, un jaune très très clair
-        self.MAIN_BG_COLOR = "#fff8e1"
-        # Couleur pour les cadres d'image et éléments d'information
-        self.LIGHT_ELEM_COLOR = "#ffffff"
-        # Couleur des boutons d'action principal
-        self.SWAP_COLOR = "#f39c12"  # Orange vif
-        self.LIVE_SWAP_COLOR = "#f1c40f"  # Jaune solaire
-        self.AI_COLOR = "#e67e22"  # Carotte Orange
-        self.SAVE_COLOR = "#2ecc71"  # Vert
-        self.EMAIL_COLOR = "#e74c3c"  # Rouge
-        self.NEUTRAL_COLOR = "#4a4a4a"  # Gris foncé pour les entrées
-
         self.load_models()
         self.load_icons()
         self.setup_ui()
@@ -41,7 +29,6 @@ class FaceSwapApp:
         self.source_path = ""
         self.target_path = ""
 
-        # Largeur et hauteur d'affichage pour les vignettes
         self.display_width = 400
         self.display_height = 300
 
@@ -55,7 +42,6 @@ class FaceSwapApp:
         self.icon_save = None
         self.icon_mail = None
 
-        # NOTE: Assurez-vous que le dossier 'icons' et tous les fichiers .png sont présents
         try:
             self.icon_load = ImageTk.PhotoImage(Image.open("icons/folder.png").resize(icon_size))
             self.icon_webcam = ImageTk.PhotoImage(Image.open("icons/camera.png").resize(icon_size))
@@ -64,134 +50,119 @@ class FaceSwapApp:
             self.icon_save = ImageTk.PhotoImage(Image.open("icons/save.png").resize(icon_size))
             self.icon_mail = ImageTk.PhotoImage(Image.open("icons/mail.png").resize(icon_size))
         except FileNotFoundError:
-            # On laisse le message d'erreur pour les icônes
-            pass
+            messagebox.showwarning("Icon Error",
+                                   "Icons not found. Please make sure the 'icons' folder exists and contains all required .png files.")
         except Exception as e:
-            # Erreur de chargement
-            pass
+            messagebox.showerror("Icon Load Error", f"Failed to load one or more icons: {e}")
 
     # Fonction pour créer toute l'interface graphique
     def setup_ui(self):
         self.root.title("Professional Face Swap v2.3")
         self.root.geometry("1200x800")
         self.root.minsize(1000, 700)
-        # 1. Fond principal de la fenêtre
-        self.root.configure(bg=self.MAIN_BG_COLOR)
+        # CHANGED: #e9ebee -> #36454F (Charcoal)
+        self.root.configure(bg="#36454F")
 
         # crée un conteneur principal
-        # 2. Fond du conteneur principal
-        main_frame = Frame(self.root, bg=self.MAIN_BG_COLOR)
+        # CHANGED: #e9ebee -> #36454F (Charcoal)
+        main_frame = Frame(self.root, bg="#36454F")
         # Place le conteneur dans la fenêtre avec marges
         main_frame.pack(fill=BOTH, expand=True, padx=20, pady=20)
 
         # === Image Frames ===
-        # 3. Fond du conteneur d'images
-        self.image_frame = Frame(main_frame, bg=self.MAIN_BG_COLOR)
+        # CHANGED: #e9ebee -> #36454F (Charcoal)
+        self.image_frame = Frame(main_frame, bg="#36454F")
         # L'affiche en remplissant l'espace disponible
         self.image_frame.pack(fill=BOTH, expand=True)
 
-        # 4. Fonds des LabelFrames (Image Source)
-        self.source_frame = LabelFrame(self.image_frame, text="Source Image", font=("Arial", 12, "bold"),
-                                       bg=self.LIGHT_ELEM_COLOR,
-                                       bd=2, relief=GROOVE)
+        # CHANGED: white -> #F0F8FF (Alice Blue)
+        # CHANGED: Default LabelFrame text color (fg) from black to a darker shade for better contrast with the new bg
+        self.source_frame = LabelFrame(self.image_frame, text="Source Image", font=("Arial", 12, "bold"), bg="#F0F8FF",
+                                       bd=2, relief=GROOVE, fg="#333333")
         self.source_frame.grid(row=0, column=0, padx=15, pady=15, sticky="nsew")
-        # 5. Fonds des Labels d'images
-        self.source_label = Label(self.source_frame, bg=self.LIGHT_ELEM_COLOR, text="Load a source image",
-                                  font=("Arial", 11),
+        # CHANGED: white -> #F0F8FF (Alice Blue)
+        self.source_label = Label(self.source_frame, bg="#F0F8FF", text="Load a source image", font=("Arial", 11),
                                   fg="#555")
         self.source_label.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-        # 4. Fonds des LabelFrames (Image Cible)
-        self.target_frame = LabelFrame(self.image_frame, text="Target Image", font=("Arial", 12, "bold"),
-                                       bg=self.LIGHT_ELEM_COLOR,
-                                       bd=2, relief=GROOVE)
+        # CHANGED: white -> #F0F8FF (Alice Blue)
+        self.target_frame = LabelFrame(self.image_frame, text="Target Image", font=("Arial", 12, "bold"), bg="#F0F8FF",
+                                       bd=2, relief=GROOVE, fg="#333333")
         self.target_frame.grid(row=0, column=1, padx=15, pady=15, sticky="nsew")
-        self.target_label = Label(self.target_frame, bg=self.LIGHT_ELEM_COLOR, text="Load a target image",
-                                  font=("Arial", 11),
+        # CHANGED: white -> #F0F8FF (Alice Blue)
+        self.target_label = Label(self.target_frame, bg="#F0F8FF", text="Load a target image", font=("Arial", 11),
                                   fg="#555")
         self.target_label.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
-        # 4. Fonds des LabelFrames (Résultat)
-        self.result_frame = LabelFrame(self.image_frame, text="Result Image", font=("Arial", 12, "bold"),
-                                       bg=self.LIGHT_ELEM_COLOR,
-                                       bd=2, relief=GROOVE)
+        # CHANGED: white -> #F0F8FF (Alice Blue)
+        self.result_frame = LabelFrame(self.image_frame, text="Result Image", font=("Arial", 12, "bold"), bg="#F0F8FF",
+                                       bd=2, relief=GROOVE, fg="#333333")
         self.result_frame.grid(row=0, column=2, padx=15, pady=15, sticky="nsew")
-        self.result_label = Label(self.result_frame, bg=self.LIGHT_ELEM_COLOR, text="Swapped image will appear here",
+        # CHANGED: white -> #F0F8FF (Alice Blue)
+        self.result_label = Label(self.result_frame, bg="#F0F8FF", text="Swapped image will appear here",
                                   font=("Arial", 11), fg="#555")
         self.result_label.pack(fill=BOTH, expand=True, padx=10, pady=10)
 
         # === Control Panel ===
-        # 6. Fond du panneau de contrôle
-        control_frame = Frame(main_frame, bg=self.MAIN_BG_COLOR)
+        # CHANGED: #e9ebee -> #36454F (Charcoal)
+        control_frame = Frame(main_frame, bg="#36454F")
         control_frame.pack(fill=X, pady=10)
 
         # Crée un groupe de boutons pour les entées (input)
-        # 7. Fond du groupe de boutons d'entrée
-        input_buttons = Frame(control_frame, bg=self.MAIN_BG_COLOR)
+        # CHANGED: #e9ebee -> #36454F (Charcoal)
+        input_buttons = Frame(control_frame, bg="#36454F")
         input_buttons.pack(side=LEFT, padx=10)
-
-        # Boutons d'entrée (couleur neutre par défaut)
-        self.make_button(input_buttons, "Load Source", self.load_source, self.NEUTRAL_COLOR, icon=self.icon_load).pack(
-            side=LEFT, padx=5)
-        self.make_button(input_buttons, "Load Target", self.load_target, self.NEUTRAL_COLOR, icon=self.icon_load).pack(
-            side=LEFT, padx=5)
+        # Crée des boutons avec ces fonctionnalités
+        # CHANGED: #4a4a4a (in make_button default) -> #4682B4 (Steel Blue)
+        self.make_button(input_buttons, "Load Source", self.load_source, color="#4682B4", icon=self.icon_load).pack(side=LEFT, padx=5)
+        self.make_button(input_buttons, "Load Target", self.load_target, color="#4682B4", icon=self.icon_load).pack(side=LEFT, padx=5)
         self.make_button(input_buttons, "Webcam Source", lambda: self.capture_from_webcam(is_source=True),
-                         self.NEUTRAL_COLOR, icon=self.icon_webcam).pack(side=LEFT, padx=5)
+                         color="#4682B4", icon=self.icon_webcam).pack(side=LEFT, padx=5)
         self.make_button(input_buttons, "Webcam Target", lambda: self.capture_from_webcam(is_source=False),
-                         self.NEUTRAL_COLOR, icon=self.icon_webcam).pack(side=LEFT, padx=5)
-
-        # Bouton AI Face
-        self.make_button(input_buttons, "Generate AI Face", self.generate_ai_face, self.AI_COLOR,
-                         icon=self.icon_ai).pack(side=LEFT, padx=5)
-
+                         color="#4682B4", icon=self.icon_webcam).pack(side=LEFT, padx=5)
+        self.make_button(input_buttons, "Generate AI Face", self.generate_ai_face, color="#4682B4", icon=self.icon_ai).pack(side=LEFT,
+                                                                                                           padx=5)
         # Crée un groupe de boutons pour les actions (output)
-        # 8. Fond du groupe de boutons d'action
-        action_buttons = Frame(control_frame, bg=self.MAIN_BG_COLOR)
+        # CHANGED: #e9ebee -> #36454F (Charcoal)
+        action_buttons = Frame(control_frame, bg="#36454F")
         action_buttons.pack(side=RIGHT, padx=10)
-
-        # Bouton Swap Faces (Orange Principal)
-        self.make_button(action_buttons, "Swap Faces", self.swap_faces, self.SWAP_COLOR, icon=self.icon_swap).pack(
-            side=LEFT,
-            padx=5)
-        # Bouton Live Swap (Jaune Solaire)
-        self.make_button(action_buttons, "Live Swap", self.open_live_video, self.LIVE_SWAP_COLOR,
-                         icon=self.icon_swap).pack(
+        # Button colors (Swap, Live Swap, Save, Email) are kept as their original specific colors for visual cue.
+        # Bouton pour échanger les visage entre source et cible
+        self.make_button(action_buttons, "Swap Faces", self.swap_faces, "#3498db", icon=self.icon_swap).pack(side=LEFT,
+                                                                                                             padx=5)
+        self.make_button(action_buttons, "Live Swap", self.open_live_video, "#ff9800", icon=self.icon_swap).pack(
             side=LEFT, padx=5)
-
-        # Bouton Sauvegarde (Vert)
-        self.save_button = self.make_button(action_buttons, "Save Result", self.save_result, self.SAVE_COLOR,
+        self.save_button = self.make_button(action_buttons, "Save Result", self.save_result, "#2ecc71",
                                             icon=self.icon_save)
         self.save_button.pack(side=LEFT, padx=5)
         self.save_button.config(state=DISABLED)
-
-        # Bouton Email (Rouge)
-        self.email_button = self.make_button(action_buttons, "Email Result", self.email_result, self.EMAIL_COLOR,
+        self.email_button = self.make_button(action_buttons, "Email Result", self.email_result, "#e74c3c",
                                              icon=self.icon_mail)
         self.email_button.pack(side=LEFT, padx=5)
         self.email_button.config(state=DISABLED)
 
         # === Settings ===
-        # 9. Fond du LabelFrame de réglages
-        settings_frame = LabelFrame(main_frame, text="Advanced Settings", font=("Arial", 12, "bold"),
-                                    bg=self.LIGHT_ELEM_COLOR, bd=2,
-                                    relief=GROOVE)
+        # CHANGED: white -> #F0F8FF (Alice Blue)
+        settings_frame = LabelFrame(main_frame, text="Advanced Settings", font=("Arial", 12, "bold"), bg="#F0F8FF", bd=2,
+                                    relief=GROOVE, fg="#333333")
         settings_frame.pack(fill=X, pady=15, padx=10)
 
-        # 10. Fonds des Frames internes aux réglages
-        blend_frame = Frame(settings_frame, bg=self.LIGHT_ELEM_COLOR)
+        # CHANGED: white -> #F0F8FF (Alice Blue)
+        blend_frame = Frame(settings_frame, bg="#F0F8FF")
         blend_frame.pack(side=LEFT, padx=20, pady=10)
-        # 11. Fond du Label du réglage
-        Label(blend_frame, text="Blend Amount", bg=self.LIGHT_ELEM_COLOR, font=("Arial", 10)).pack()
-        # 12. Fond de la Scale
+        # CHANGED: white -> #F0F8FF (Alice Blue)
+        Label(blend_frame, text="Blend Amount", bg="#F0F8FF", font=("Arial", 10)).pack()
         self.blend_scale = Scale(blend_frame, from_=0, to=100, orient=HORIZONTAL, length=200, bg="#f0f2f5", bd=0,
                                  highlightthickness=0, troughcolor="#bdc3c7")
         self.blend_scale.set(65)
         self.blend_scale.pack()
         self.blend_scale.bind("<ButtonRelease-1>", self.update_face_swap_event)
 
-        color_frame = Frame(settings_frame, bg=self.LIGHT_ELEM_COLOR)
+        # CHANGED: white -> #F0F8FF (Alice Blue)
+        color_frame = Frame(settings_frame, bg="#F0F8FF")
         color_frame.pack(side=LEFT, padx=20, pady=10)
-        Label(color_frame, text="Color Adjustment", bg=self.LIGHT_ELEM_COLOR, font=("Arial", 10)).pack()
+        # CHANGED: white -> #F0F8FF (Alice Blue)
+        Label(color_frame, text="Color Adjustment", bg="#F0F8FF", font=("Arial", 10)).pack()
         self.color_scale = Scale(color_frame, from_=0, to=100, orient=HORIZONTAL, length=200, bg="#f0f2f5", bd=0,
                                  highlightthickness=0, troughcolor="#bdc3c7")
         self.color_scale.set(50)
@@ -201,9 +172,9 @@ class FaceSwapApp:
         # === Status Bar ===
         self.status_var = StringVar()
         self.status_var.set("Ready to load images...")
-        # 13. Fond de la barre de statut (laisse blanc pour un bon contraste)
-        status_bar = Label(self.root, textvariable=self.status_var, bd=1, relief=SUNKEN, anchor=W, bg="white",
-                           font=("Arial", 10))
+        # CHANGED: white -> #DCDCDC (Light Gray)
+        status_bar = Label(self.root, textvariable=self.status_var, bd=1, relief=SUNKEN, anchor=W, bg="#DCDCDC",
+                           font=("Arial", 10), fg="#333") # Added fg for readability on light gray
         status_bar.pack(side=BOTTOM, fill=X)
 
         # configuration des colonnes pour que l'affiche s'adapte
@@ -212,7 +183,11 @@ class FaceSwapApp:
         self.image_frame.rowconfigure(0, weight=1)
 
     # Définir les boutons quand le souris passe dessus
-    def make_button(self, parent, text, command, color, icon=None):
+    def make_button(self, parent, text, command, color="#4a4a4a", icon=None):
+        # CHANGED: #4a4a4a (default in original function) -> #4682B4 (Steel Blue)
+        if color == "#4a4a4a":
+             color = "#4682B4"
+
         button = Button(
             parent,
             text=text,
@@ -253,9 +228,8 @@ class FaceSwapApp:
             # Nom du fichier contenant le modèle des 68 points du visage
             model_path = "shape_predictor_68_face_landmarks.dat"
             if not os.path.exists(model_path):
-                # NOTE: En environnement réel, il faudrait gérer le téléchargement ici
                 raise FileNotFoundError(
-                    "Dlib model file not found. Please ensure 'shape_predictor_68_face_landmarks.dat' is in the directory.")
+                    "Dlib model file not found. Please download it from http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2 and place it in the same directory.")
             self.predictor = dlib.shape_predictor(model_path)
         except Exception as e:
             messagebox.showerror("Model Load Error", str(e))
@@ -291,6 +265,42 @@ class FaceSwapApp:
 
     def load_target(self):
         self.load_image(is_source=False)
+
+    def load_celebrity(self, is_source=True):
+        celeb_folder = os.path.join(os.getcwd(), "celebs")
+        if not os.path.exists(celeb_folder):
+            messagebox.showerror("Error",
+                                 "Celebs folder not found! Please create a 'celebs' folder with celebrity images.")
+            return
+
+        path = filedialog.askopenfilename(
+            initialdir=celeb_folder,
+            title="Select Celebrity Image",
+            filetypes=[("Image Files", "*.jpg *.jpeg *.png")]
+        )
+
+        if not path:
+            return
+
+        try:
+            image = cv2.imread(path)
+            if image is None:
+                raise ValueError("Invalid image file")
+            if is_source:
+                self.source_image = image
+                self.source_path = path
+                self.show_image(image, self.source_label)
+                self.status_var.set(f"Celebrity source image loaded: {os.path.basename(path)}")
+            else:
+                self.target_image = image
+                self.target_path = path
+                self.show_image(image, self.target_label)
+                self.status_var.set(f"Celebrity target image loaded: {os.path.basename(path)}")
+
+            if self.source_image is not None and self.target_image is not None:
+                self.status_var.set("Ready to perform face swap with celebrity.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load celebrity image: {str(e)}")
 
     # Méthode pour capturer une photo depuis la webcam
     def capture_from_webcam(self, is_source=True):
@@ -512,40 +522,39 @@ class FaceSwapApp:
         self.root.update()
 
         try:
-            # Sauvegarde l'image dans un fichier temporaire pour l'attachement
+            # Save the result image to a temporary file
             temp_file_path = "temp_result.jpg"
             cv2.imwrite(temp_file_path, self.result_image)
 
-            # Détails de l'email
-            # ATTENTION : Vous devez utiliser un mot de passe d'application (App Password) pour Gmail,
-            # car la connexion avec un mot de passe classique est bloquée par défaut pour des raisons de sécurité.
-            sender_email = "projeuneasso@gmail.com"
-            sender_password = "qriv crzm bocj bevx"
+            # Email details. You MUST use an app-specific password for security.
+            # See https://support.google.com/accounts/answer/185833
+            sender_email = "projeuneasso@gmail.com"  # Your email address
+            sender_password = "qriv crzm bocj bevx"  # Your app password
             smtp_server = "smtp.gmail.com"
-            smtp_port = 465  # Port SSL
+            smtp_port = 465  # SSL port
 
-            # Crée un message multi-parties
+            # Create a multipart message
             msg = MIMEMultipart()
             msg['From'] = sender_email
             msg['To'] = recipient_email
             msg['Subject'] = "Your Face-Swapped Photo!"
 
-            # Attache le corps du texte
+            # Attach the text body
             body = "Hi,\n\nHere is your face-swapped photo generated by the Professional Face Swap App.\n\nBest regards,\n CPNV Porte Ouvert"
             msg.attach(MIMEText(body, 'plain'))
 
-            # Attache l'image
+            # Attach the image
             with open(temp_file_path, 'rb') as fp:
                 img = MIMEImage(fp.read())
                 img.add_header('Content-Disposition', 'attachment', filename='face_swapped_photo.jpg')
                 msg.attach(img)
 
-            # Connexion au serveur SMTP et envoi de l'email
+            # Connect to the SMTP server and send the email
             with smtplib.SMTP_SSL(smtp_server, smtp_port) as smtp:
                 smtp.login(sender_email, sender_password)
                 smtp.send_message(msg)
 
-            os.remove(temp_file_path)  # Supprime le fichier temporaire
+            os.remove(temp_file_path)  # Clean up the temporary file
 
             messagebox.showinfo("Success", f"Photo successfully emailed to {recipient_email}.")
             self.status_var.set("Email sent.")
@@ -555,6 +564,7 @@ class FaceSwapApp:
             self.status_var.set("Email failed to send.")
         finally:
             self.root.config(cursor="")
+            # print(self.status_var) # control status
 
     def open_live_video(self):
         if self.source_image is None:
