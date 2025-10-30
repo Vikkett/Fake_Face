@@ -1,83 +1,219 @@
-Fake_Face : Professional Face Swap - L'Art de la Réalité Augmentée Faciale de Bureau
-I. Introduction et Vision du Projet
-Professional Face Swap (Fake_Face) est une application de bureau hautement spécialisée, développée en Python, conçue pour redéfinir les standards de l'échange de visages (face swap) en offrant à la fois une qualité d'image supérieure et une flexibilité d'utilisation. Loin des outils basiques en ligne, cette solution s'appuie sur des bibliothèques de vision par ordinateur reconnues et des algorithmes robustes pour garantir des résultats photoréalistes, que ce soit pour des images statiques ou en temps réel via webcam.
+# FakeFace V 0.8
 
-L'objectif principal du projet est de fournir aux professionnels, aux développeurs et aux passionnés un outil puissant et transparent, capable de fusionner deux identités faciales de manière harmonieuse, en gérant les défis complexes de la géométrie faciale, de l'éclairage et de la colorimétrie
+Application Python de **face swap** (échange de visages) avec interface graphique **Tkinter**, détection faciale via **dlib**, traitement d’images **OpenCV**, génération de visage IA (**thispersondoesnotexist.com**), sauvegarde, envoi **par e-mail** et mode **Live** (webcam en temps réel) pour un projet de portes ouvertes au CPNV.
 
-Fonctionnalités Techniques Avancées
-Le moteur de l'application repose sur une chaîne de traitement sophistiquée, orchestrée par OpenCV et Dlib, qui permet les fonctionnalités suivantes :
+> ⚠️ **Avertissement légal & éthique**  
+> Utilisez ce programme uniquement avec le **consentement explicite** des personnes concernées.  
+> Respectez les lois en vigueur (droit à l’image, RGPD/LPD) et les CGU des services tiers.
 
-1. Gestion des Sources d'Entrée Multiples 📂🧍🎥
-L'application offre une polyvalence inégalée dans la manière de fournir les visages sources et cibles :
+---
 
-Chargement Fichier Classique : Importation traditionnelle d'une image source et d'une image cible via des boîtes de dialogue natives.
+## 📸 Aperçu
 
-Génération de Visage IA (ThisPersonDoesNotExist) : Intégration d'un module unique permettant de télécharger automatiquement un visage généré par intelligence artificielle depuis le web. Ceci est idéal pour utiliser des visages qui n'existent pas, offrant une source neutre et de haute résolution.
+Le projet permet :
+- De charger deux images (source et cible)
+- De détecter les visages via **dlib**
+- De déformer et ajuster les couleurs de la source vers la cible
+- D’effectuer un **blending** doux entre les deux visages
+- De sauvegarder ou d’envoyer le résultat par e-mail
+- D’utiliser un **mode Live** via webcam
 
-Capture Webcam Intégrée : La webcam de l'utilisateur peut être utilisée pour capturer une image source ou cible fixe en quelques secondes, facilitant l'intégration de son propre visage dans le processus.
+---
 
-2. Algorithme de Repérage et de Remplacement 🤖🔄
-Au cœur du processus se trouve l'étape de détection et de déformation (warping), critique pour un swap crédible :
+## ✨ Fonctionnalités principales
 
-Détection des Visages Dlib : Utilisation du détecteur de visage frontal de Dlib, reconnu pour sa précision et sa robustesse.
+- Interface **Tkinter** moderne et intuitive  
+- Détection et repérage facial via `shape_predictor_68_face_landmarks.dat`  
+- Chargement depuis fichier ou **webcam**
+- Génération de **visage IA** automatique
+- Réglages dynamiques : **opacité (Blend)** et **correction colorimétrique**
+- **Masque doux** (convex hull élargi de 15 % + flou gaussien)
+- **Envoi SMTP sécurisé** via Gmail (configurable)
+- **Mode Live** fluide et léger pour le swap en direct
 
-Repérage de 68 Points Faciaux : Le modèle shape_predictor_68_face_landmarks.dat est exploité pour identifier 68 points de repère faciaux clés (yeux, nez, bouche, mâchoire), essentiels pour définir la géométrie du visage.
+---
 
-Transformation Affine Partielle : La matrice de transformation est calculée pour déformer le visage source afin qu'il corresponde exactement à la position, à l'échelle et à la rotation des points de repère du visage cible. L'utilisation de cv2.estimateAffinePartial2D assure une précision géométrique optimale.
+## 🧱 Architecture du projet
 
-3. Fusion et Post-Traitement Avancés 🎛️
-Pour masquer l'artefact de l'échange et garantir une intégration visuelle parfaite, deux mécanismes de réglage sont proposés :
+```bash
+project/
+├── main.py
+├── shape_predictor_68_face_landmarks.dat
+├── ai_faces/
+├── icons/
+│   ├── folder.png
+│   ├── camera.png
+│   ├── ai.png
+│   ├── swap.png
+│   ├── save.png
+│   └── mail.png
+├── .env                  # (optionnel) configuration SMTP
+└── README.md
+```
 
-Contrôle de l’Opacité (Blend Amount) : Un curseur permet d'ajuster le mélange pondéré (weighted blend) entre le visage déformé et l'image cible. Ce paramètre agit comme un facteur alpha, contrôlant l'opacité du masque final pour un mélange en douceur.
+---
 
-Correction Colorimétrique LAB : Un deuxième curseur gère l'ajustement des couleurs. En travaillant dans l'espace colorimétrique LAB (Luminosité, A, B), l'algorithme peut transférer statistiquement la moyenne et la déviation standard des couleurs du visage cible vers le visage source. Cela permet au visage inséré de s'adapter naturellement à l'éclairage et à la tonalité de l'image de fond.
+## ⚙️ Installation
 
-Masque Doux (Soft Mask) : Un masque de visage élargi et flouté (filtre Gaussien) est généré pour créer une transition progressive entre le visage échangé et la peau environnante, éliminant les lignes de démarcation abruptes souvent visibles dans les outils de moindre qualité.
+### 1️⃣ Cloner le dépôt
+```bash
+git clone https://github.com/<votre-utilisateur>/<votre-projet>.git
+cd <votre-projet>
+```
 
-4. Mode Live et Interactions 🖥️💾
-Live Swap Vidéo : Un mode spécial est dédié à l'échange de visage en temps réel via la webcam. Dans ce mode, la détection des points de repère et la déformation sont effectuées à la cadence vidéo, permettant une démonstration fluide de l'algorithme de swap.
+### 2️⃣ Créer un environnement virtuel
+```bash
+python -m venv .venv
+# Windows :
+.venv\Scripts\activate
+# macOS / Linux :
+source .venv/bin/activate
+```
 
-Sauvegarde et Partage : Les fonctionnalités classiques d'enregistrement de l'image finale et d'envoi par e-mail (nécessitant une configuration SMTP) sont incluses pour un flux de travail complet.
+### 3️⃣ Installer les dépendances
+```bash
+installer vs code pour utiliser C#
+pip install opencv-python numpy Pillow dlib python-dotenv
+```
 
-III. Prérequis Techniques et Installation
-Environnement de Développement
-Python : Version 3.6 ou ultérieure.
 
-Modules Python Requis : L'installation s'effectue via pip et inclut les dépendances fondamentales de vision par ordinateur et d'interface graphique :
+---
 
-Bash
+## 🚀 Démarrage
 
-pip install opencv-python numpy dlib Pillow
-(Note : tkinter, uuid et urllib sont généralement intégrés dans l'installation standard de Python.)
+```bash
+python main.py
+```
 
-Modèle de Données Nécessaire
-L'application dépend d'un modèle pré-entraîné pour le repérage facial :
+### Étapes d’utilisation :
+1. **Load Source** et **Load Target**  
+2. (Optionnel) **Generate AI Face**  
+3. Cliquer sur **Swap Faces**  
+4. Ajuster les sliders :  
+   - `Blend Amount (Source Opacity)`  
+   - `Color Adjustment`  
+5. **Save Result** ou **Email Result**
 
-Fichier : shape_predictor_68_face_landmarks.dat
+---
 
-Source : Ce fichier doit être téléchargé depuis le dépôt officiel Dlib (lien fourni) et impérativement placé dans le même répertoire que le script Python afin que la fonction load_models puisse y accéder sans erreur.
+## 🖥️ Interface graphique
 
-IV. Guide d'Utilisation Détaillé
-Lancement de l'Application
-Bash
+| Bouton | Fonction |
+|--------|-----------|
+| **Load Source / Load Target** | Charger les images |
+| **Webcam Source / Target** | Capturer depuis la caméra |
+| **Generate AI Face** | Télécharger un visage IA |
+| **Swap Faces** | Exécuter le swap |
+| **Live Swap** | Mode webcam en direct |
+| **Save Result** | Enregistrer le résultat |
+| **Email Result** | Envoyer par e-mail |
 
-python nom_du_fichier.py
-Flux de Travail Standard
-Chargement des Visages : Utilisez "Load Source" pour le visage à insérer et "Load Target" pour l'image de destination.
+---
 
-Exécution du Swap : Cliquez sur "Swap Faces". Cette étape exécute la détection, la déformation géométrique et le calcul initial du masque.
+## 🔐 Configuration E-mail sécurisée (.env)
 
-Affinement des Résultats :
+Créer un fichier `.env` à la racine du projet :
 
-Le curseur "Blend Amount" (Opacité Source) vous permet d'ajuster la densité du visage inséré.
+```env
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=465
+SENDER_EMAIL=exemple@gmail.com
+SENDER_PASSWORD=mot_de_passe_application
+```
 
-Le curseur "Color Adjustment" permet de doser l'intensité de la correction colorimétrique LAB, cruciale pour l'effet de réalisme.
+Dans le code :
+```python
+from dotenv import load_dotenv
+import os
 
-Finalisation : Enregistrez votre création via "Save Result" ou utilisez l'option "Email Result".
+load_dotenv()
+sender_email = os.getenv("SENDER_EMAIL")
+sender_password = os.getenv("SENDER_PASSWORD")
+smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+smtp_port = int(os.getenv("SMTP_PORT", "465"))
+```
 
-Considérations pour la Qualité
-Détection : La performance est directement liée à la clarté et à la frontalité des visages. L'algorithme se concentre sur le premier visage détecté dans chaque image.
+> 💡 Pour Gmail : activez la **vérification en deux étapes** et utilisez un **mot de passe d’application**.
 
-Résolution et Éclairage : Les meilleurs résultats sont obtenus lorsque les deux images présentent des conditions d'éclairage et des résolutions similaires. Des différences importantes peuvent nécessiter des ajustements plus agressifs des curseurs.
+---
 
-Limitation : Les visages fortement inclinés, partiellement masqués ou vus de profil sont susceptibles de générer des échecs de détection ou des résultats de déformation non convaincants.
+## 🎥 Mode Live
+
+- La **source** doit être chargée avant d’activer le mode.  
+- Le masque utilisé est simplifié pour de meilleures performances.  
+- Appuyer sur **Échap** pour quitter le mode Live.
+
+---
+
+## 💾 Sauvegarde & Export
+
+- Enregistrement au format `.jpg` ou `.png`
+- Nom automatique : `swap_<source>_<target>.jpg`
+- Envoi par e-mail via **SMTP sécurisé (SSL)**
+
+---
+
+## ⚡ Performance & compatibilité
+
+- Recommandé : images entre **720p** et **1080p**
+- Éviter les fichiers > 20 MP
+- Le mode **Live** dépend des performances CPU/GPU
+- Compatible : **Windows**, **macOS**, **Linux**
+
+---
+
+## 🧩 Dépannage (FAQ)
+
+**Q : “Dlib model not loaded”**  
+➡️ Vérifiez que `shape_predictor_68_face_landmarks.dat` est bien à la racine.
+
+**Q : “Cannot open webcam”**  
+➡️ Fermez d’autres applications (Zoom, OBS...) et réessayez.  
+
+**Q : “Face not detected”**  
+➡️ Utilisez une image nette, visage bien visible et frontal.
+
+**Q : “Email failed to send”**  
+➡️ Vérifiez les identifiants SMTP et le port 465 (SSL activé).
+
+---
+
+## 🧠 Conseils techniques
+
+- Le masque est créé à partir du **convex hull** des 68 landmarks, élargi de 15 %.  
+- Flou Gaussien appliqué pour un bord doux : `GaussianBlur(25x25)`  
+- Correction colorimétrique en **LAB** avec stats pondérées par masque.  
+- Blending pondéré : `result = src * alpha + target * (1 - alpha)`
+
+---
+
+## 🛡️ Sécurité & conformité
+
+- Obtenir un **consentement explicite** avant tout traitement.  
+- Ne pas diffuser de deepfakes à des fins trompeuses.  
+- Respecter les **réglementations RGPD/LPD**.  
+- Ne jamais stocker de **mots de passe** dans le code.  
+
+---
+
+## 🧭 Feuille de route (Roadmap)
+
+- [ ] Poisson blending pour fusion plus réaliste  
+- [ ] Multi-visages & sélection manuelle  
+- [ ] Accélération GPU (CUDA/cuDNN)  
+- [ ] Interface plus réactive (threading)  
+- [ ] Export automatique PDF + métadonnées  
+
+---
+
+## 📄 Licence
+
+Projet éducatif CPNV
+---
+
+## 🙏 Crédits
+
+- **Dlib** — Davis E. King  
+- **OpenCV** — OpenCV.org  
+- **Pillow** — Python Imaging Library  
+- **thispersondoesnotexist.com** — pour la génération de visages IA  
